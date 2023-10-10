@@ -1,77 +1,112 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "lists.h"
 
 /**
  *
- * print_listint - prints all elements of a listint_t list
- * @h: pointer to head of list
- * Return: number of nodes
+ * reverse - reverses the second half of the list
+ * @h_r: head of the second half
+ *
+ * Return: no return
  *
  */
 
-size_t print_listint(const listint_t *h)
+void reverse(listint_t **h_r)
 {
-    const listint_t *current;
-    unsigned int n; /* number of nodes */
+	listint_t *prv;
+	listint_t *crr;
+	listint_t *nxt;
 
-    current = h;
-    n = 0;
-    while (current != NULL)
-    {
-        printf("%i\n", current->n);
-        current = current->next;
-        n++;
-    }
+	prv = NULL;
+	crr = *h_r;
 
-    return (n);
+	while (crr != NULL)
+	{
+		nxt = crr->next;
+		crr->next = prv;
+		prv = crr;
+		crr = nxt;
+	}
+
+	*h_r = prv;
 }
 
 /**
- * add_nodeint_end - adds a new node at the end of a listint_t list
- * @head: pointer to pointer of first node of listint_t list
- * @n: integer to be included in new node
- * Return: address of the new element or NULL if it fails
+ * compare - compares each int of the list
+ * @h1: head of the first half
+ * @h2: head of the second half
+ *
+ * Return: 0
  */
-listint_t *add_nodeint_end(listint_t **head, const int n)
+
+int compare(listint_t *h1, listint_t *h2)
 {
-    listint_t *new;
-    listint_t *current;
+	listint_t *tmp1;
+	listint_t *tmp2;
 
-    current = *head;
+	tmp1 = h1;
+	tmp2 = h2;
 
-    new = malloc(sizeof(listint_t));
-    if (new == NULL)
-        return (NULL);
+	while (tmp1 != NULL && tmp2 != NULL)
+	{
+		if (tmp1->n == tmp2->n)
+		{
+			tmp1 = tmp1->next;
+			tmp2 = tmp2->next;
+		}
+		else
+			return (0);
+	}
 
-    new->n = n;
-    new->next = NULL;
-
-    if (*head == NULL)
-        *head = new;
-    else
-    {
-        while (current->next != NULL)
-            current = current->next;
-        current->next = new;
-    }
-
-    return (new);
+	if (tmp1 == NULL && tmp2 == NULL)
+		return (1);
+	
+	return (0);
 }
 
 /**
- * free_listint - frees a listint_t list
- * @head: pointer to list to be freed.
- * Return: void
+ * is_palindrome - checks if a singly linked list is a palindrome
+ * @head: pointer to head of list
+ *
+ * Return: 1 if palindrome, 0 if not
  */
-void free_listint(listint_t *head)
-{
-    listint_t *current;
 
-    while (head != NULL)
-    {
-        current = head;
-        head = head->next;
-        free(current);
-    }
+int is_palindrome(listint_t **head)
+{
+	listint_t *slow, *fast, *prev_slow;
+	listint_t *scn_half, *middle;
+	int isp;
+
+	slow = fast = prev_slow = *head;
+	middle = NULL;
+	isp = 1;
+
+	if (*head != NULL && (*head)->next != NULL)
+	{
+		while (fast != NULL && fast->next != NULL)
+		{
+			fast = fast->next->next;
+			prev_slow = slow;
+			slow = slow->next;
+		}
+
+		if (fast != NULL)
+		{
+			middle = slow;
+			slow = slow->next;
+		}
+
+		scn_half = slow;
+		prev_slow->next = NULL;
+		reverse(&scn_half);
+		isp = compare(*head, scn_half);
+
+		if (middle != NULL)
+		{
+			prev_slow->next = middle;
+			middle->next = scn_half;
+		}
+		else
+			prev_slow->next = scn_half;
+	}
+
+	return (isp);
 }
